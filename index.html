@@ -1,16 +1,17 @@
-<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <title>
-        Line Chart
+        Map
     </title>
-
     <style>
-
-        form {
-            margin: 0 auto;
-            width: 130px;
+        /* Set the size of the div element
+        that contains the map */
+        #map {
+            justify-self: center;
+            align-self: center;
+            height: 75%;
         }
 
         html {
@@ -29,10 +30,113 @@
             -moz-osx-font-smoothing: grayscale;
         }
     </style>
-
 </head>
+
 <body>
-<a href="scatter-chart.html">Scatter chart</a>
-<a href="line-chart.html">Line chart</a>
+<h2 style="text-align:center">A map to show the total average Pollutant at each weather station in the Bristol area</h2>
+<br>
+<p style="text-align:center">This map shows the total average selected pollutant over every entry in the data set. To see the station name and average value, first select a pollutant and hit show stations, then hover over a map marker.</p>
+<p style="text-align:center">The colour of the station shows the severity of the pollution, in accordance with the government website <a href="https://uk-air.defra.gov.uk/air-pollution/daqi?view=more-info&pollutant=no2#pollutant">Available here.</a></p>
+<br>
+<div style="align-content:center">
+    <!--The div element for the map -->
+    <div id="map"></div>
+</div>
+<br>
+<form style="text-align:center" id="form" action="javascript:;" onchange="showMap(initMap())">
+    <!--    NOx;NO2;NO;PM10;NVPM10;VPM10;NVPM2.5;PM2.5;VPM2.5;CO;O3;SO2; -->
+    <select name="pollutant" id="pollutant" onchange="showMap(initMap())">
+        <option value="nox" selected="selected">NOx</option>
+        <option value="no2">NO2</option>
+        <option value="no">NO</option>
+        <option value="pm10">PM10</option>
+        <option value="nvpm10">NVPM10</option>
+        <option value="vpm10">VPM10</option>
+        <option value="nvpm2.5">NVPM2.5</option>
+        <option value="pm2.5">PM2.5</option>
+        <option value="vpm2.5">VPM2.5</option>
+        <option value="co">CO</option>
+        <option value="o3">O3</option>
+        <option value="so2">SO2</option>
+    </select>
+
+    <input style="text-align:center" onclick="showMap(initMap())" type="submit" value="Show Stations">
+</form>
+<br>
+<a href="/Coursework/chart/index.html">Back to index</a>
+<br>
+
+
+<!--Add a script by google -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmndL4a9SPaIhaq_YJmAWbjkt698pcg2s&callback=initMap&libraries=&v=weekly"
+        async></script>
+<!--Load the AJAX API-->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script id="testing" type="text/javascript">
+
+    function initMap() {
+        // The location of Bristol
+        const bristol = {
+            lat: 51.4538,
+            lng: -2.5918
+        };
+
+        // Create the map, centered at Bristol
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 12,
+            center: bristol,
+            mapTypeId: "terrain",
+        });
+        return map;
+    }
+
+    function showMap(map) {
+        var jsonData = $.ajax({
+            url: "create-map.php",
+            data: $("form").serialize(),
+            dataType: "json",
+            async: false
+        }).responseText;
+
+        const stations = JSON.parse(jsonData);
+
+        for (let i = 0; i < stations.length; i++) {
+            const coords = stations[i].geocode;
+            const latLng = new google.maps.LatLng(coords[0], coords[1]);
+            const colour = stations[i].colour;
+            const station = stations[i].station;
+            const value = stations[i].value;
+            const title = "Station: " + station + "\nTotal average pollutant: " + value;
+
+            const circleMarker = {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    fillColor: colour,
+                    fillOpacity: 0.2,
+                    scale: value,
+                    strokeColor: "white",
+                    strokeWeight: 0.5,
+            }
+            new google.maps.Marker({
+                position: latLng,
+                map: map,
+                title: title,
+                icon: circleMarker
+            });
+
+        }
+    }
+    function getCircle(value, colour) {
+        return {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: colour,
+            fillOpacity: 0.2,
+            scale: Math.pow(2, value) / 2,
+            strokeColor: "white",
+            strokeWeight: 0.5,
+        };
+    }
+</script>
 </body>
+
 </html>

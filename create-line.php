@@ -1,4 +1,8 @@
 <?php
+@date_default_timezone_set('GMT'); // setup to allow code to run
+ini_set('memory_limit', '512M');
+ini_set('max_execution_time', '300');
+ini_set('auto_detect_line_endings', true);
 
 //Determine if variable is set and is not NULL
 if (isset($_GET['date'])) {

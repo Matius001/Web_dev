@@ -67,7 +67,7 @@
 
             //check if table is populated.
             if (data.getNumberOfRows() === 0) {
-                document.getElementById("demo").innerHTML = "Sorry, we have no data for this date :-(";
+                document.getElementById("demo").innerHTML = "Sorry, we have no data at this site for this date";
             } else {
                 document.getElementById("demo").innerHTML = "";
             }
@@ -151,6 +151,7 @@
 <br>
 <br>
 <h2 style="text-align:center">Line Chart: Please select a date and station</h2>
+<p style="text-align:center">Please allow a minute for the data to be collected</p>
 <br>
 
 <!--https://stackoverflow.com/questions/10520899/form-action-with-javascript/34467977#34467977------------------->
@@ -167,6 +168,8 @@
         <option value="pm2.5">PM2.5</option>
         <option value="vpm2.5">VPM2.5</option>
         <option value="co">CO</option>
+        <option value="o3">O3</option>
+        <option value="so2">SO2</option>
     </select>
     <select name="station" id="station" onchange="showLine()">
         <option value="188" selected="selected">AURN Bristol Centre</option>
