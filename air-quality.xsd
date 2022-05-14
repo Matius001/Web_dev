@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="rec">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute type="xs:positiveInteger" name="ts" use="required"/>
+                    <xs:attribute type="xs:float" name="nox" use="optional"/>
+                    <xs:attribute type="xs:float" name="no2" use="optional"/>
+                    <xs:attribute type="xs:float" name="no" use="optional"/>
+                    <xs:attribute type="xs:float" name="pm10" use="optional"/>
+                    <xs:attribute type="xs:float" name="nvpm10" use="optional"/>
+                    <xs:attribute type="xs:float" name="vpm10" use="optional"/>
+                    <xs:attribute type="xs:float" name="nvpm2.5" use="optional"/>
+                    <xs:attribute type="xs:float" name="pm2.5" use="optional"/>
+                    <xs:attribute type="xs:float" name="vpm2.5" use="optional"/>
+                    <xs:attribute type="xs:float" name="co" use="optional"/>
+                    <xs:attribute type="xs:float" name="o3" use="optional"/>
+                    <xs:attribute type="xs:float" name="so2" use="optional"/>
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="station">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="rec" maxOccurs="unbounded" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute type="xs:positiveInteger" name="id" use="required"/>
+            <xs:attribute type="xs:string" name="name" use="required"/>
+            <xs:attribute type="xs:string" name="geocode" use="required"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

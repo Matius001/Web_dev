@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>
+        Scatter Chart
+    </title>
+
+    <style>
+
+        form {
+            margin: 0 auto;
+            width: 130px;
+        }
+
+        html {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: -webkit-linear-gradient(45deg, rgba(66, 183, 245, 0.8) 0%, rgba(66, 245, 189, 0.4) 100%);
+            background: linear-gradient(45deg, rgba(66, 183, 245, 0.8) 0%, rgba(66, 245, 189, 0.4) 100%);
+            color: rgba(0, 0, 0, 0.6);
+            font-family: "Roboto", sans-serif;
+            font-size: 14px;
+            line-height: 1.6em;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+
+</head>
+<body>
+<!--Load the AJAX API-->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script id="testing" type="text/javascript">
+
+    /***************************************************************************
+     showScatter()
+     - funtion to load the visualization API and package needed for scatter graph.
+     - Also contains ajax call to get information from php script.
+
+     */
+
+    function showScatter() {
+        // Load the Visualization API and the piechart package.
+        google.charts.load('current', {'packages': ['corechart']});
+
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.charts.setOnLoadCallback(drawScatter);
+
+        function drawScatter() {
+            var jsonData = $.ajax({
+                url: "create-scatter.php",
+                data: $("form").serialize(),
+                dataType: "json",
+                async: false
+            }).responseText;
+
+
+            // Create our data table out of JSON data loaded from server.
+            var data = new google.visualization.DataTable(jsonData)
+
+
+            //check if table is populated.
+            if (data.getNumberOfRows() === 0) {
+                document.getElementById("demo").innerHTML = "Sorry, we have no data for this site at this date.";
+            } else {
+                document.getElementById("demo").innerHTML = "";
+            }
+
+            //get required data to show on graph title
+            var yearText = document.getElementById("date");
+            var locationText = document.getElementById("station");
+            var location = locationText.options[locationText.selectedIndex].text;
+            var date = yearText.options[yearText.selectedIndex].text;
+
+            //add grid lines
+            var options = {
+                title: "Carbon Monoxide levels at 8AM at " + location + " throughout " + date,
+                hAxis: {
+                    gridlines: {
+                        count: -1,
+                        units: {
+                            days: {format: ["dd MMM"]},
+                            hours: {format: ["HH:mm", 'ha']}
+                        }
+                    },
+                    minorGridlines: {
+                        units: {
+                            hours: {format: ["hh:mm:ss a", "ha"]},
+                            minutes: {format: ["HH:mm a Z", ":mm"]}
+                        }
+                    }
+                }
+            }
+            //instantiate and draw chart
+            var chart = new google.visualization.ScatterChart(document.getElementById("chart_div"));
+            chart.draw(data, options);
+
+        }
+    }
+</script>
+<!-- div to hold charts -->
+<div id="chart_div"></div>
+<h1 id="demo" style="text-align:center"></h1>
+<br>
+<br>
+
+
+<!--INPUT------------------------------------------------------------------------------------------------------------------>
+
+
+<h2 style="text-align:center">Scatter Chart: Please select a year and station</h2>
+<br>
+
+
+<!--https://stackoverflow.com/questions/10520899/form-action-with-javascript/34467977#34467977------------------->
+<form name="formScatter" id="formScatter" action="javascript:;" onchange="showScatter()">
+    <select name="date" id="date">
+        <option value="01/01/2015 08:00:00">2015</option>
+        <option value="01/01/2016 08:00:00">2016</option>
+        <option value="01/01/2017 08:00:00" selected="selected">2017</option>
+        <option value="01/01/2018 08:00:00">2018</option>
+        <option value="01/01/2019 08:00:00">2019</option>
+    </select>
+
+    <select name="station" id="station" onchange="showScatter()">
+        <option value="188" selected="selected">AURN Bristol Centre</option>
+        <option value="203">Brislington Depot</option>
+        <option value="206">Rupert Street</option>
+        <option value="209">IKEA M32</option>
+        <option value="213">Old Market</option>
+        <option value="215">Parson Street School</option>
+        <option value="228">Temple Meads Station</option>
+        <option value="270">Wells Road</option>
+        <option value="271">Trailer Portway P&R</option>
+        <option value="375">Newfoundland Road Police Station</option>
+        <option value="395">Shiner's Garage</option>
+        <option value="447">Bath Road</option>
+        <option value="452">AURN St Paul's</option>
+        <option value="459">Cheltenham Road / Station Road</option>
+        <option value="463">Fishponds Road</option>
+        <option value="481">CREATE Centre Roof</option>
+        <option value="500">Temple Way</option>
+        <option value="501">Colston Avenue</option>
+    </select>
+
+    <input onclick="showScatter()" type="submit" value="Show Graph">
+
+</form>
+<br>
+<a href="index.html">Back to index</a>
+<br>
+</body>
+</html>
+
+<!--// station names: For reference-->
+<!--// 188 => 'AURN Bristol Centre',-->
+<!--// 203 => 'Brislington Depot',-->
+<!--// 206 => 'Rupert Street',-->
+<!--// 209 => 'IKEA M32',-->
+<!--// 213 => 'Old Market',-->
+<!--// 215 => 'Parson Street School',-->
+<!--// 228 => 'Temple Meads Station',-->
+<!--// 270 => 'Wells Road',-->
+<!--// 271 => 'Trailer Portway P&R',-->
+<!--// 375 => 'Newfoundland Road Police Station',-->
+<!--// 395 => "Shiner's Garage",-->
+<!--// 452 => 'AURN St Pauls',-->
+<!--// 447 => 'Bath Road',-->
+<!--// 459 => 'Cheltenham Road \ Station Road',-->
+<!--// 463 => 'Fishponds Road',-->
+<!--// 481 => 'CREATE Centre Roof',-->
+<!--// 500 => 'Temple Way',-->
+<!--// 501 => 'Colston Avenue'-->

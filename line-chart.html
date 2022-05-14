@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>
+       Line Chart
+    </title>
+
+    <style>
+
+        form {
+            margin: 0 auto;
+            width: 130px;
+        }
+
+        html {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: -webkit-linear-gradient(45deg, rgba(66, 183, 245, 0.8) 0%, rgba(66, 245, 189, 0.4) 100%);
+            background: linear-gradient(45deg, rgba(66, 183, 245, 0.8) 0%, rgba(66, 245, 189, 0.4) 100%);
+            color: rgba(0, 0, 0, 0.6);
+            font-family: "Roboto", sans-serif;
+            font-size: 14px;
+            line-height: 1.6em;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+
+</head>
+<body>
+<!--Load the AJAX API-->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script id="testing" type="text/javascript">
+
+
+    function showLine() {
+        // Load the Visualization API and the piechart package.
+        google.charts.load('current', {'packages': ['corechart']});
+
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.charts.setOnLoadCallback(drawLine);
+
+        function drawLine() {
+            //get selected location input using JQuery
+            var location = $("#station :selected").text();
+            //get selected pollutant input using JQuery
+            var pollutant = $("#pollutant :selected").text();
+            //get date input using JQuery
+            var date = $("#date").val();
+
+            //use ajax to serialize data.
+            var jsonData = $.ajax({
+                url: "create-line.php",
+                data: $("form").serialize(),
+                dataType: "json",
+                async: false
+            }).responseText;
+
+
+            // Create our data table out of JSON data loaded from server.
+            var data = new google.visualization.DataTable(jsonData)
+
+            //check if table is populated.
+            if (data.getNumberOfRows() === 0) {
+                document.getElementById("demo").innerHTML = "Sorry, we have no data for this date :-(";
+            } else {
+                document.getElementById("demo").innerHTML = "";
+            }
+
+
+            var yearText = document.getElementById("date");
+            //get correct parts of date to show in the graph title.
+            var matchyear = date.match(/(.*)-.*-.*/);
+            var matchmonth = date.match(/.*-(.*)-.*/);
+            var matchday = date.match(/.*-.*-(.*)/);
+
+            var finaldate = matchday[1] + "/" + matchmonth[1] + "/" + matchyear[1]
+
+
+            //Add 1 day to finaldate
+            //https://stackoverflow.com/questions/24312296/add-one-day-to-date-in-javascript/24312386
+            //https://stackoverflow.com/questions/12409299/how-to-get-current-formatted-date-dd-mm-yyyy-in-javascript-and-append-it-to-an-i
+
+            var d = matchyear[1] + "-" + matchmonth[1] + "-" + matchday[1];
+            console.log(d);
+            var startDate = new Date(d)
+
+            // seconds * minutes * hours * milliseconds = 1 day
+            var day = 60 * 60 * 24 * 1000;
+
+            var endDate = new Date(startDate.getTime() + day);
+
+            var dd = endDate.getDate();
+            var mm = endDate.getMonth() + 1; //January is 0!
+
+            var yyyy = endDate.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var finalEndDate = dd + '/' + mm + '/' + yyyy;
+            console.log(finalEndDate);
+
+
+            //add title and gridlines to display the data aesthetically.
+            /***************************************************************************
+             code below inspiration from:
+             - https://developers.google.com/chart/interactive/docs/datesandtimes
+
+
+             */
+            var options = {
+                pointSize: 3,
+                colors: ['#e0440e'],
+                title: pollutant + " levels between " + finaldate + " and " + finalEndDate + " at " + location,
+
+                hAxis: {
+                    gridlines: {
+                        count: -1,
+                        units: {
+                            days: {format: ["dd MMM"]},
+                            hours: {format: ["HH:mm", 'ha']}
+                        }
+                    },
+                    minorGridlines: {
+                        units: {
+                            hours: {format: ["hh:mm:ss a", "ha"]},
+                            minutes: {format: ["HH:mm a Z", ":mm"]}
+                        }
+                    }
+                }
+
+            }
+
+            var chart = new google.visualization.LineChart(document.getElementById("chart_div"));
+            chart.draw(data, options);
+
+        }
+    }
+</script>
+
+<div id="chart_div"></div>
+<h1 id="demo" style="text-align:center"></h1>
+<br>
+<br>
+<h2 style="text-align:center">Line Chart: Please select a date and station</h2>
+<br>
+
+<!--https://stackoverflow.com/questions/10520899/form-action-with-javascript/34467977#34467977------------------->
+<form style="text-align:center" id="form" action="javascript:;" onchange="showLine()">
+<!--    NOx;NO2;NO;PM10;NVPM10;VPM10;NVPM2.5;PM2.5;VPM2.5;CO;O3;SO2; -->
+    <select name="pollutant" id="pollutant" onchange="showLine()">
+        <option value="nox" selected="selected">NOx</option>
+        <option value="no2">NO2</option>
+        <option value="no">NO</option>
+        <option value="pm10">PM10</option>
+        <option value="nvpm10">NVPM10</option>
+        <option value="vpm10">VPM10</option>
+        <option value="nvpm2.5">NVPM2.5</option>
+        <option value="pm2.5">PM2.5</option>
+        <option value="vpm2.5">VPM2.5</option>
+        <option value="co">CO</option>
+    </select>
+    <select name="station" id="station" onchange="showLine()">
+        <option value="188" selected="selected">AURN Bristol Centre</option>
+        <option value="203">Brislington Depot</option>
+        <option value="206">Rupert Street</option>
+        <option value="209">IKEA M32</option>
+        <option value="213">Old Market</option>
+        <option value="215">Parson Street School</option>
+        <option value="228">Temple Meads Station</option>
+        <option value="270">Wells Road</option>
+        <option value="271">Trailer Portway P&R</option>
+        <option value="375">Newfoundland Road Police Station</option>
+        <option value="395">Shiner's Garage</option>
+        <option value="447">Bath Road</option>
+        <option value="452">AURN St Paul's</option>
+        <option value="459">Cheltenham Road / Station Road</option>
+        <option value="463">Fishponds Road</option>
+        <option value="481">CREATE Centre Roof</option>
+        <option value="500">Temple Way</option>
+        <option value="501">Colston Avenue</option>
+    </select>
+    <br>
+    <input type="date" name = "date" id="date" value="2016-07-01" onchange="showLine()"/>
+    <br>
+
+
+    <input onclick="showLine()" type="submit" value="Show Graph">
+
+</form>
+<br>
+<a href="index.html">Back to index</a>
+<br>
+</body>
+</html>
