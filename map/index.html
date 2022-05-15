@@ -1,0 +1,140 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>
+        Map
+    </title>
+    <!--    CSS for a pretty page -->
+    <style>
+        /* Set the size of the div element
+        that contains the map */
+        #map {
+            justify-self: center;
+            align-self: center;
+            height: 75%;
+        }
+
+        html {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: -webkit-linear-gradient(45deg, rgba(66, 183, 245, 0.8) 0%, rgba(66, 245, 189, 0.4) 100%);
+            background: linear-gradient(45deg, rgba(66, 183, 245, 0.8) 0%, rgba(66, 245, 189, 0.4) 100%);
+            color: rgba(0, 0, 0, 0.6);
+            font-family: "Roboto", sans-serif;
+            font-size: 14px;
+            line-height: 1.6em;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+
+<body>
+<h2 style="text-align:center">A map to show the total average Pollutant at each weather station in the Bristol area</h2>
+<br>
+<p style="text-align:center">This map shows the total average selected pollutant over every entry in the data set. To see the station name and average value, first select a pollutant and hit show stations, then hover over a map marker.</p>
+<p style="text-align:center">The colour of the station shows the severity of the pollution, in accordance with the government website <a href="https://uk-air.defra.gov.uk/air-pollution/daqi?view=more-info&pollutant=no2#pollutant">Available here.</a></p>
+<br>
+<div style="align-content:center">
+    <!--The div element for the map -->
+    <div id="map"></div>
+</div>
+<br>
+<form style="text-align:center" id="form" action="javascript:;">
+    <!--    form for submitting desired pollutant information -->
+    <select name="pollutant" id="pollutant">
+        <option value="nox" selected="selected">NOx</option>
+        <option value="no2">NO2</option>
+        <option value="no">NO</option>
+        <option value="pm10">PM10</option>
+        <option value="nvpm10">NVPM10</option>
+        <option value="vpm10">VPM10</option>
+        <option value="nvpm2.5">NVPM2.5</option>
+        <option value="pm2.5">PM2.5</option>
+        <option value="vpm2.5">VPM2.5</option>
+        <option value="co">CO</option>
+        <option value="o3">O3</option>
+        <option value="so2">SO2</option>
+    </select>
+
+    <input style="text-align:center" onclick="showMap(initMap())" type="submit" value="Show Stations">
+</form>
+<br>
+<a href="/Coursework/chart/index.html">Back to index</a>
+<br>
+
+
+<!--Add a script by google -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmndL4a9SPaIhaq_YJmAWbjkt698pcg2s&callback=initMap&libraries=&v=weekly"
+        async></script>
+<!--Load the AJAX API-->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script id="testing" type="text/javascript">
+
+    function initMap() { // initiates the map
+        //https://www.geeksforgeeks.org/how-to-add-google-maps-to-a-website/
+        // The location of Bristol
+        const bristol = {
+            lat: 51.4538,
+            lng: -2.5918
+        };
+
+        // Create the map, centered at Bristol
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 12,
+            center: bristol,
+            mapTypeId: "terrain",
+        });
+        return map;
+    }
+
+    function showMap(map) { // function to update the map with required information
+        var jsonData = $.ajax({ // Ajax request to php script
+            url: "create-map.php",
+            data: $("form").serialize(),
+            dataType: "json",
+            async: false
+        }).responseText;
+
+        const stations = JSON.parse(jsonData);
+
+        //https://developers.google.com/maps/documentation/javascript/earthquakes#maps_earthquake_circles-javascript
+        for (let i = 0; i < stations.length; i++) { //gets the necessary data from each station to create map marker
+            const coords = stations[i].geocode;
+            const latLng = new google.maps.LatLng(coords[0], coords[1]);
+            const colour = stations[i].colour;
+            const station = stations[i].station;
+            const value = stations[i].value;
+            const title = "Station: " + station + "\nTotal average pollutant: " + value;
+            let size = 30
+            if (value > 100) {
+                size = (value/2);
+            }
+
+            // https://developers.google.com/maps/documentation/javascript/symbols
+            const circleMarker = { // Custom map marker based on value of pollutant
+                    path: google.maps.SymbolPath.CIRCLE,
+                    fillColor: colour,
+                    fillOpacity: 0.2,
+                    scale: size,
+                    strokeColor: "white",
+                    strokeWeight: 0.5,
+            }
+            new google.maps.Marker({ // creates map marker for each station
+                position: latLng,
+                map: map,
+                title: title,
+                icon: circleMarker
+            });
+
+        }
+    }
+</script>
+</body>
+
+</html>
